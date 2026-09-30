@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { prisma } from '@/lib/db/prisma';
 import { ScenarioSelector } from '@/components/scenario-selector';
+import { FormattedDate } from '@/components/formatted-date';
 import {
   PackageCheck,
   CheckCircle2,
@@ -178,7 +179,7 @@ export default async function DashboardPage() {
                     </td>
                     <td className="py-3 px-4">{getDecisionBadge(insp.overallDecision)}</td>
                     <td className="py-3 px-4 text-slate-500 whitespace-nowrap">
-                      {new Date(insp.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      <FormattedDate date={insp.createdAt} format="time" />
                     </td>
                     <td className="py-3 px-4 text-right">
                       <Link

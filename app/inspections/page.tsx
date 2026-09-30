@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { FormattedDate } from '@/components/formatted-date';
 import {
   PackageCheck,
   CheckCircle2,
@@ -202,8 +203,7 @@ export default function InspectionHistoryClientPage() {
                       </td>
                       <td className="py-3 px-4">{getDecisionBadge(insp.overallDecision)}</td>
                       <td className="py-3 px-4 text-slate-500 whitespace-nowrap font-mono">
-                        {new Date(insp.createdAt).toLocaleDateString()}{' '}
-                        {new Date(insp.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        <FormattedDate date={insp.createdAt} format="full" />
                       </td>
                       <td className="py-3 px-4 text-right">
                         <Link

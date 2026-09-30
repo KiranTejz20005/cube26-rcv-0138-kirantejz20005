@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { ImageModal } from '@/components/image-modal';
+import { FormattedDate } from '@/components/formatted-date';
 import {
   CheckCircle2,
   AlertTriangle,
@@ -241,7 +242,7 @@ export default function InspectionReportClientPage() {
         <div className="flex items-center gap-3 text-xs text-slate-500 font-mono">
           <span className="flex items-center gap-1">
             <Calendar className="w-3.5 h-3.5 text-blue-600" />
-            {new Date(inspection.createdAt).toLocaleString()}
+            <FormattedDate date={inspection.createdAt} format="full" />
           </span>
           <span className="flex items-center gap-1">
             <Layers className="w-3.5 h-3.5 text-slate-400" />
