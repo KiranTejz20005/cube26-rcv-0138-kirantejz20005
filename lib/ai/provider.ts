@@ -25,5 +25,15 @@ export interface InspectionInput {
 }
 
 export interface VisionProvider {
+  readonly name: string;
+  readonly model: string;
   inspect(input: InspectionInput): Promise<VisionInspection>;
 }
+
+export interface VisionInspectionResult {
+  observation: VisionInspection;
+  providerName: string;
+  providerModel: string;
+  attemptedProviders: string[];
+}
+

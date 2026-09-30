@@ -23,6 +23,8 @@ interface InspectionData {
   id: string;
   status: string;
   overallDecision: string | null;
+  aiProvider?: string | null;
+  aiModel?: string | null;
   createdAt: string;
   updatedAt: string;
   purchaseOrder: {
@@ -309,11 +311,13 @@ export default function InspectionReportClientPage() {
         </div>
 
         <div className="bg-white p-3.5 rounded border border-slate-200 shadow-2xs">
-          <span className="text-slate-500 font-bold uppercase text-[10px] block">Verification Engine</span>
+          <span className="text-slate-500 font-bold uppercase text-[10px] block">Verification Engine &amp; AI Provider</span>
           <span className="text-xs font-bold text-emerald-700 block mt-0.5 flex items-center gap-1">
-            <Sparkles className="w-3.5 h-3.5" /> Deterministic Business Rules
+            <Sparkles className="w-3.5 h-3.5" /> Deterministic Rules + {inspection.aiProvider || 'Vision AI'}
           </span>
-          <span className="text-slate-500 block">Perceptual extraction by Vision AI</span>
+          <span className="text-slate-500 block truncate text-[11px] font-mono mt-0.5">
+            Model: {inspection.aiModel || 'Multimodal Observation Engine'}
+          </span>
         </div>
       </div>
 

@@ -13,6 +13,8 @@ model Inspection {
   id              String            @id @default(cuid())
   status          String            @default("DRAFT") // DRAFT, PROCESSING, COMPLETED, FAILED
   overallDecision String?           // PASS, EXCEPTION, UNCERTAIN
+  aiProvider      String?           // NVIDIA, Groq, Gemini, Demo
+  aiModel         String?           // Model identifier used for inference
   createdAt       DateTime          @default(now())
   updatedAt       DateTime          @updatedAt
 

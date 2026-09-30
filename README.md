@@ -133,7 +133,7 @@ the application delivers **100% reproducible, verifiable, and auditable outcomes
 | Component | Technology | Rationale |
 | :--- | :--- | :--- |
 | **Frontend** | Next.js (App Router), React, TypeScript | Fast, server-rendered React components with strict typing |
-| **Styling** | Tailwind CSS, Custom Glassmorphism System | Professional dark-mode operations interface |
+| **Styling** | Tailwind CSS, Custom Operations Design System | Clean operations light theme interface |
 | **Icons** | Lucide React | Modern, clean icon suite |
 | **Database** | SQLite (Dev) / Neon PostgreSQL (Prod), Prisma ORM | Zero-setup local persistence with instant schema migration |
 | **Storage** | Local Storage Adapter / Cloudflare R2 | Zero storage cost, direct local fallback for offline dev |
