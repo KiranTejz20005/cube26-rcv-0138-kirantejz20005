@@ -46,19 +46,19 @@ export function ScenarioSelector({ onSelectPreset, directRun = false }: Scenario
     switch (result) {
       case 'PASS':
         return (
-          <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
+          <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-400 bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-800/80">
             <CheckCircle2 className="w-3 h-3" /> PASS
           </span>
         );
       case 'EXCEPTION':
         return (
-          <span className="inline-flex items-center gap-1 text-[11px] font-bold text-rose-400 bg-rose-500/10 px-2 py-0.5 rounded border border-rose-500/20">
+          <span className="inline-flex items-center gap-1 text-[10px] font-bold text-rose-400 bg-rose-950/60 px-2 py-0.5 rounded border border-rose-800/80">
             <AlertTriangle className="w-3 h-3" /> EXCEPTION
           </span>
         );
       case 'UNCERTAIN':
         return (
-          <span className="inline-flex items-center gap-1 text-[11px] font-bold text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">
+          <span className="inline-flex items-center gap-1 text-[10px] font-bold text-amber-400 bg-amber-950/60 px-2 py-0.5 rounded border border-amber-800/80">
             <HelpCircle className="w-3 h-3" /> UNCERTAIN
           </span>
         );
@@ -66,20 +66,20 @@ export function ScenarioSelector({ onSelectPreset, directRun = false }: Scenario
   };
 
   return (
-    <div className="bg-slate-900/80 rounded-xl border border-slate-800 p-4 mb-6">
+    <div className="bg-gray-900 rounded border border-gray-800 p-4 mb-6">
       <div className="flex items-center justify-between mb-3">
         <div>
-          <h3 className="text-sm font-semibold text-white flex items-center gap-2">
-            <Play className="w-4 h-4 text-blue-400 fill-blue-400" />
+          <h3 className="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-2">
+            <Play className="w-3.5 h-3.5 text-blue-400 fill-blue-400" />
             Evaluation Test Scenarios (1-Click Presets)
           </h3>
-          <p className="text-xs text-slate-400 mt-0.5">
-            Instantly run or prefill any of the 6 core visual receiving inspection evaluation cases.
+          <p className="text-xs text-gray-400 mt-0.5">
+            Instantly run or prefill any of the 6 visual receiving inspection test cases.
           </p>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
         {DEMO_SCENARIOS.map((scenario) => {
           const isLoading = loadingId === scenario.id;
           return (
@@ -87,23 +87,23 @@ export function ScenarioSelector({ onSelectPreset, directRun = false }: Scenario
               key={scenario.id}
               onClick={() => handleRunScenario(scenario)}
               disabled={isLoading}
-              className="text-left p-3 rounded-lg bg-slate-800/60 hover:bg-slate-800 border border-slate-700/60 hover:border-blue-500/50 transition-all group flex flex-col justify-between"
+              className="text-left p-3 rounded bg-gray-950 hover:bg-gray-800/70 border border-gray-800 hover:border-gray-700 transition-colors group flex flex-col justify-between"
             >
               <div>
-                <div className="flex items-center justify-between gap-2 mb-1.5">
-                  <span className="text-xs font-semibold text-slate-200 group-hover:text-blue-300 transition-colors">
+                <div className="flex items-center justify-between gap-2 mb-1">
+                  <span className="text-xs font-semibold text-gray-200 group-hover:text-blue-400 transition-colors">
                     {scenario.name}
                   </span>
                   {getResultBadge(scenario.expectedResult)}
                 </div>
-                <p className="text-[11px] text-slate-400 line-clamp-2 leading-relaxed">
+                <p className="text-[11px] text-gray-400 line-clamp-2 leading-relaxed">
                   {scenario.description}
                 </p>
               </div>
 
-              <div className="mt-3 pt-2 border-t border-slate-700/40 flex items-center justify-between text-[11px] text-slate-400">
-                <span className="font-mono text-slate-400">{scenario.orderNumber}</span>
-                <span className="text-blue-400 group-hover:underline flex items-center gap-1 font-medium">
+              <div className="mt-2.5 pt-2 border-t border-gray-800/80 flex items-center justify-between text-[11px] text-gray-400">
+                <span className="font-mono text-gray-400">{scenario.orderNumber}</span>
+                <span className="text-blue-400 font-medium flex items-center gap-1">
                   {isLoading ? (
                     <>
                       <Loader2 className="w-3 h-3 animate-spin" /> Running...

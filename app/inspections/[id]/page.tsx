@@ -1,6 +1,9 @@
+'use client';
+
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { notFound } from 'next/navigation';
-import { prisma } from '@/lib/db/prisma';
+import { useParams, useRouter } from 'next/navigation';
+import { ImageModal } from '@/components/image-modal';
 import {
   CheckCircle2,
   AlertTriangle,
@@ -9,40 +12,130 @@ import {
   Calendar,
   Layers,
   Sparkles,
-  ShieldAlert,
-  Search,
   Maximize2,
   RefreshCw,
+  Loader2,
+  AlertCircle,
 } from 'lucide-react';
 
-export const revalidate = 0;
+interface InspectionData {
+  id: string;
+  status: string;
+  overallDecision: string | null;
+  createdAt: string;
+  updatedAt: string;
+  purchaseOrder: {
+    orderNumber: string;
+    sku: string;
+    productName: string | null;
+    expectedQuantity: number;
+    expectedVariant: string | null;
+  } | null;
+  images: Array<{
+    id: string;
+    type: 'REFERENCE' | 'RECEIVING';
+    storageKey: string;
+    url: string;
+  }>;
+  checks: Array<{
+    id: string;
+    type: 'SKU' | 'QUANTITY' | 'VARIANT' | 'DAMAGE' | 'COMPONENTS';
+    status: 'PASS' | 'FAIL' | 'UNCERTAIN';
+    expectedValue: string;
+    observedValue: string | null;
+    confidence: number;
+    reason: string;
+    evidence: Array<{
+      id: string;
+      observation: string;
+      image: {
+        id: string;
+        url: string;
+        type: string;
+      } | null;
+    }>;
+  }>;
+}
 
-export default async function InspectionReportPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
-  const { id } = await params;
+export default function InspectionReportClientPage() {
+  const params = useParams();
+  const router = useRouter();
+  const id = params.id as string;
 
-  const inspection = await prisma.inspection.findUnique({
-    where: { id },
-    include: {
-      purchaseOrder: true,
-      images: true,
-      checks: {
-        include: {
-          evidence: {
-            include: {
-              image: true,
-            },
-          },
-        },
-      },
-    },
-  });
+  const [inspection, setInspection] = useState<InspectionData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [retrying, setRetrying] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
-  if (!inspection) {
-    notFound();
+  // Image Modal state
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalIndex, setModalIndex] = useState(0);
+
+  const fetchInspection = async () => {
+    try {
+      const res = await fetch(`/api/inspections/${id}`);
+      const data = await res.json();
+      if (data.success && data.data) {
+        setInspection(data.data);
+      } else {
+        setErrorMsg('Inspection record not found.');
+      }
+    } catch (err) {
+      console.error('Fetch error:', err);
+      setErrorMsg('Failed to load inspection details.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (id) fetchInspection();
+  }, [id]);
+
+  const handleRetryInspect = async () => {
+    setRetrying(true);
+    setErrorMsg(null);
+    try {
+      const res = await fetch(`/api/inspections/${id}/inspect`, {
+        method: 'POST',
+      });
+      const data = await res.json();
+      if (data.success) {
+        await fetchInspection();
+      } else {
+        setErrorMsg(`Retry failed: ${data.error || 'Server error'}`);
+      }
+    } catch (err) {
+      console.error('Retry error:', err);
+      setErrorMsg('Error retrying inspection.');
+    } finally {
+      setRetrying(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="py-20 text-center space-y-3">
+        <Loader2 className="w-8 h-8 text-blue-400 animate-spin mx-auto" />
+        <p className="text-xs text-gray-400">Loading inspection audit record...</p>
+      </div>
+    );
+  }
+
+  if (!inspection || !inspection.purchaseOrder) {
+    return (
+      <div className="py-16 text-center space-y-4">
+        <AlertCircle className="w-10 h-10 text-rose-500 mx-auto" />
+        <h2 className="text-base font-bold text-white">Inspection Record Not Found</h2>
+        <p className="text-xs text-gray-400">The requested inspection ID &quot;{id}&quot; does not exist.</p>
+        <Link
+          href="/"
+          className="inline-flex items-center gap-1.5 px-4 py-2 rounded text-xs font-bold bg-gray-800 text-gray-300 hover:text-white"
+        >
+          <ArrowLeft className="w-4 h-4" /> Return to Dashboard
+        </Link>
+      </div>
+    );
   }
 
   const po = inspection.purchaseOrder;
@@ -54,16 +147,16 @@ export default async function InspectionReportPage({
         return {
           title: 'SHIPMENT VERIFIED: PASS',
           subtitle: 'All visual and purchase order checks passed deterministic validation criteria.',
-          bg: 'bg-emerald-950/40 border-emerald-500/40 text-emerald-400 glow-pass',
-          badge: 'bg-emerald-500 text-slate-950',
+          bg: 'bg-emerald-950/60 border-emerald-800 text-emerald-400',
+          badge: 'bg-emerald-600 text-white',
           icon: CheckCircle2,
         };
       case 'EXCEPTION':
         return {
           title: 'SHIPMENT REJECTED: EXCEPTION',
           subtitle: 'One or more deterministic business rule failures were detected. Action required.',
-          bg: 'bg-rose-950/40 border-rose-500/40 text-rose-400 glow-exception',
-          badge: 'bg-rose-500 text-white',
+          bg: 'bg-rose-950/60 border-rose-800 text-rose-400',
+          badge: 'bg-rose-600 text-white',
           icon: AlertTriangle,
         };
       case 'UNCERTAIN':
@@ -71,9 +164,9 @@ export default async function InspectionReportPage({
         return {
           title: 'VERIFICATION UNCERTAIN: MANUAL REVIEW REQUIRED',
           subtitle:
-            'Visual evidence is insufficient to complete deterministic verification. The system refrains from forcing a decision.',
-          bg: 'bg-amber-950/40 border-amber-500/40 text-amber-400 glow-uncertain',
-          badge: 'bg-amber-500 text-slate-950',
+            'Visual evidence is insufficient to complete deterministic verification. System refrains from forcing a decision.',
+          bg: 'bg-amber-950/60 border-amber-800 text-amber-400',
+          badge: 'bg-amber-600 text-white',
           icon: HelpCircle,
         };
     }
@@ -86,182 +179,185 @@ export default async function InspectionReportPage({
     switch (status) {
       case 'PASS':
         return (
-          <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
-            <CheckCircle2 className="w-3.5 h-3.5" /> PASS
+          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded text-[10px] font-bold bg-emerald-950 text-emerald-400 border border-emerald-800">
+            <CheckCircle2 className="w-3 h-3" /> PASS
           </span>
         );
       case 'FAIL':
         return (
-          <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold bg-rose-500/10 text-rose-400 border border-rose-500/30">
-            <AlertTriangle className="w-3.5 h-3.5" /> FAIL
+          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded text-[10px] font-bold bg-rose-950 text-rose-400 border border-rose-800">
+            <AlertTriangle className="w-3 h-3" /> FAIL
           </span>
         );
       case 'UNCERTAIN':
       default:
         return (
-          <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold bg-amber-500/10 text-amber-400 border border-amber-500/30">
-            <HelpCircle className="w-3.5 h-3.5" /> UNCERTAIN
+          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded text-[10px] font-bold bg-amber-950 text-amber-400 border border-amber-800">
+            <HelpCircle className="w-3 h-3" /> UNCERTAIN
           </span>
         );
     }
   };
 
+  const allGalleryImages = inspection.images.map((img) => ({
+    url: img.url,
+    label: `${img.type} - ${img.storageKey}`,
+  }));
+
+  const openImageModal = (url: string) => {
+    const idx = allGalleryImages.findIndex((i) => i.url === url);
+    setModalIndex(idx >= 0 ? idx : 0);
+    setModalOpen(true);
+  };
+
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       {/* Back button & top metadata */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <Link
           href="/"
-          className="inline-flex items-center gap-2 text-xs font-semibold text-slate-400 hover:text-white transition-colors"
+          className="inline-flex items-center gap-1.5 text-xs font-semibold text-gray-400 hover:text-white transition-colors"
         >
-          <ArrowLeft className="w-4 h-4" /> Back to Operations Dashboard
+          <ArrowLeft className="w-4 h-4" /> Back to Dashboard
         </Link>
 
-        <div className="flex items-center gap-4 text-xs text-slate-400">
-          <span className="flex items-center gap-1 font-mono">
+        <div className="flex items-center gap-3 text-xs text-gray-400 font-mono">
+          <span className="flex items-center gap-1">
             <Calendar className="w-3.5 h-3.5 text-blue-400" />
             {new Date(inspection.createdAt).toLocaleString()}
           </span>
-          <span className="flex items-center gap-1 font-mono">
-            <Layers className="w-3.5 h-3.5 text-indigo-400" />
+          <span className="flex items-center gap-1">
+            <Layers className="w-3.5 h-3.5 text-gray-400" />
             ID: {inspection.id}
           </span>
         </div>
       </div>
 
       {/* OVERALL DECISION BANNER */}
-      <div className={`p-6 rounded-2xl border ${headerInfo.bg} flex flex-col md:flex-row md:items-center justify-between gap-6`}>
-        <div className="flex items-start gap-4">
-          <div className="p-3 rounded-2xl bg-slate-900/80 border border-slate-700/60 shadow-lg">
-            <HeaderIcon className="w-8 h-8" />
+      <div className={`p-5 rounded border ${headerInfo.bg} flex flex-col md:flex-row md:items-center justify-between gap-4`}>
+        <div className="flex items-start gap-3.5">
+          <div className="p-2.5 rounded bg-gray-950 border border-gray-800">
+            <HeaderIcon className="w-7 h-7" />
           </div>
           <div>
-            <div className="flex items-center gap-3">
-              <span className={`px-2.5 py-0.5 rounded text-[11px] font-extrabold uppercase tracking-wider ${headerInfo.badge}`}>
+            <div className="flex items-center gap-2">
+              <span className={`px-2 py-0.5 rounded text-[10px] font-extrabold uppercase ${headerInfo.badge}`}>
                 {decision || 'IN PROGRESS'}
               </span>
-              <span className="text-xs font-mono text-slate-400">PO: {po?.orderNumber}</span>
+              <span className="text-xs font-mono text-gray-300">PO: {po.orderNumber}</span>
             </div>
-            <h1 className="text-xl sm:text-2xl font-black text-white mt-1">
-              {headerInfo.title}
-            </h1>
-            <p className="text-xs sm:text-sm text-slate-300 mt-1 max-w-2xl leading-relaxed">
-              {headerInfo.subtitle}
-            </p>
+            <h1 className="text-lg font-bold text-white mt-1">{headerInfo.title}</h1>
+            <p className="text-xs text-gray-300 mt-0.5 leading-relaxed">{headerInfo.subtitle}</p>
           </div>
         </div>
-      </div>
 
-      {/* PO & INSPECTION COMPARISON SUMMARY */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-slate-900/80 rounded-xl border border-slate-800 p-4">
-          <p className="text-xs font-semibold text-slate-400 uppercase">PO Reference</p>
-          <p className="text-lg font-bold text-white mt-1">{po?.orderNumber}</p>
-          <p className="text-xs text-slate-400">{po?.productName || 'Standard Product'}</p>
-        </div>
-
-        <div className="bg-slate-900/80 rounded-xl border border-slate-800 p-4">
-          <p className="text-xs font-semibold text-slate-400 uppercase">Expected SKU &amp; Qty</p>
-          <p className="text-lg font-bold text-blue-400 mt-1 font-mono">{po?.sku}</p>
-          <p className="text-xs text-slate-300">
-            Quantity: <span className="font-bold text-white">{po?.expectedQuantity}</span> | Variant: <span className="font-bold text-white">{po?.expectedVariant || 'Default'}</span>
-          </p>
-        </div>
-
-        <div className="bg-slate-900/80 rounded-xl border border-slate-800 p-4">
-          <p className="text-xs font-semibold text-slate-400 uppercase">Engine Status</p>
-          <p className="text-lg font-bold text-emerald-400 mt-1 flex items-center gap-1.5">
-            <Sparkles className="w-4 h-4 text-emerald-400" />
-            Deterministic Business Rules
-          </p>
-          <p className="text-xs text-slate-400">Perceptual extraction by Gemini AI</p>
+        {/* Retry / Pipeline Controls */}
+        <div className="flex items-center gap-2">
+          <button
+            onClick={handleRetryInspect}
+            disabled={retrying}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-bold bg-gray-900 hover:bg-gray-800 text-gray-200 border border-gray-700 transition-colors disabled:opacity-50"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${retrying ? 'animate-spin' : ''}`} />
+            {retrying ? 'Re-analyzing...' : 'Re-run Engine'}
+          </button>
         </div>
       </div>
 
-      {/* CHECKS BREAKDOWN SECTION */}
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <h2 className="text-lg font-bold text-white flex items-center gap-2">
-            <Search className="w-5 h-5 text-blue-400" />
-            Inspection Parameter Verification Checks
-          </h2>
-          <span className="text-xs text-slate-400">5 Parameter Audit</span>
+      {/* Error Alert if retry failed */}
+      {errorMsg && (
+        <div className="bg-rose-950/60 border border-rose-800 p-3 rounded text-xs text-rose-300 flex items-center justify-between">
+          <span>⚠️ {errorMsg}</span>
+          <button onClick={() => setErrorMsg(null)} className="text-rose-400">
+            Dismiss
+          </button>
+        </div>
+      )}
+
+      {/* PO SPECIFICATIONS SUMMARY */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+        <div className="bg-gray-900 p-3.5 rounded border border-gray-800">
+          <span className="text-gray-400 font-bold uppercase text-[10px] block">PO Reference</span>
+          <span className="text-sm font-bold text-white block mt-0.5 font-mono">{po.orderNumber}</span>
+          <span className="text-gray-400 block truncate">{po.productName || 'Standard Item'}</span>
         </div>
 
-        <div className="grid grid-cols-1 gap-4">
+        <div className="bg-gray-900 p-3.5 rounded border border-gray-800">
+          <span className="text-gray-400 font-bold uppercase text-[10px] block">Expected SKU &amp; Quantity</span>
+          <span className="text-sm font-bold text-blue-400 block mt-0.5 font-mono">{po.sku}</span>
+          <span className="text-gray-300 block">
+            Quantity: <span className="font-bold text-white">{po.expectedQuantity}</span> | Variant: <span className="font-bold text-white">{po.expectedVariant || 'Default'}</span>
+          </span>
+        </div>
+
+        <div className="bg-gray-900 p-3.5 rounded border border-gray-800">
+          <span className="text-gray-400 font-bold uppercase text-[10px] block">Verification Engine</span>
+          <span className="text-xs font-bold text-emerald-400 block mt-0.5 flex items-center gap-1">
+            <Sparkles className="w-3.5 h-3.5" /> Deterministic Business Rules
+          </span>
+          <span className="text-gray-400 block">Perceptual extraction by Vision AI</span>
+        </div>
+      </div>
+
+      {/* PARAMETER CHECKS COMPARISON TABLE */}
+      <div className="space-y-3">
+        <h2 className="text-sm font-bold text-white uppercase tracking-wider">
+          5-Parameter Inspection Audit
+        </h2>
+
+        <div className="space-y-3">
           {inspection.checks.map((check) => {
             const confidencePct = Math.round((check.confidence || 1.0) * 100);
 
             return (
               <div
                 key={check.id}
-                className={`bg-slate-900/90 rounded-2xl border p-5 transition-all space-y-4 ${
+                className={`bg-gray-900 rounded border p-4 space-y-3 ${
                   check.status === 'FAIL'
-                    ? 'border-rose-500/30 bg-rose-950/10'
+                    ? 'border-rose-800 bg-rose-950/20'
                     : check.status === 'UNCERTAIN'
-                    ? 'border-amber-500/30 bg-amber-950/10'
-                    : 'border-slate-800 hover:border-slate-700'
+                    ? 'border-amber-800 bg-amber-950/20'
+                    : 'border-gray-800'
                 }`}
               >
-                {/* Check Header */}
-                <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-800 pb-3">
-                  <div className="flex items-center gap-3">
-                    <span className="px-2.5 py-1 rounded bg-slate-800 text-slate-200 text-xs font-mono font-bold tracking-wider">
+                {/* Header line */}
+                <div className="flex flex-wrap items-center justify-between gap-2 border-b border-gray-800/80 pb-2.5">
+                  <div className="flex items-center gap-2">
+                    <span className="px-2 py-0.5 rounded bg-gray-950 text-gray-300 font-mono text-[11px] font-bold">
                       {check.type}
                     </span>
-                    <span className="text-sm font-bold text-white">
+                    <span className="text-xs font-bold text-white">
                       {check.type === 'SKU'
-                        ? 'Product Identity & SKU Barcode'
+                        ? 'Product Identity / SKU'
                         : check.type === 'QUANTITY'
-                        ? 'Visual Quantity Count'
+                        ? 'Quantity Count'
                         : check.type === 'VARIANT'
-                        ? 'Color / Product Variant'
+                        ? 'Variant / Color'
                         : check.type === 'DAMAGE'
-                        ? 'Package & Physical Condition'
-                        : 'Component Presence Verification'}
+                        ? 'Packaging Condition'
+                        : 'Component Presence'}
                     </span>
                   </div>
 
-                  <div className="flex items-center gap-4">
-                    {/* Confidence Meter */}
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs text-slate-400">Confidence:</span>
-                      <div className="w-20 bg-slate-800 rounded-full h-2 overflow-hidden">
-                        <div
-                          className={`h-full rounded-full ${
-                            confidencePct > 80
-                              ? 'bg-emerald-500'
-                              : confidencePct > 50
-                              ? 'bg-amber-500'
-                              : 'bg-rose-500'
-                          }`}
-                          style={{ width: `${confidencePct}%` }}
-                        />
-                      </div>
-                      <span className="text-xs font-mono font-semibold text-slate-300">{confidencePct}%</span>
-                    </div>
-
+                  <div className="flex items-center gap-3">
+                    <span className="text-[11px] text-gray-400 font-mono">
+                      Confidence: <span className="font-bold text-gray-200">{confidencePct}%</span>
+                    </span>
                     {getCheckStatusBadge(check.status)}
                   </div>
                 </div>
 
-                {/* Expected vs Observed comparison */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
-                  <div className="bg-slate-950/60 p-3 rounded-xl border border-slate-800">
-                    <span className="text-slate-400 font-semibold block mb-1 uppercase text-[10px]">
-                      Expected (Purchase Order):
-                    </span>
-                    <span className="text-sm font-semibold text-slate-200 font-mono">
-                      {check.expectedValue}
-                    </span>
+                {/* Expected vs Observed Grid */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                  <div className="bg-gray-950 p-2.5 rounded border border-gray-800">
+                    <span className="text-gray-500 font-bold uppercase text-[10px] block">Expected (PO):</span>
+                    <span className="font-mono font-semibold text-gray-200">{check.expectedValue}</span>
                   </div>
 
-                  <div className="bg-slate-950/60 p-3 rounded-xl border border-slate-800">
-                    <span className="text-slate-400 font-semibold block mb-1 uppercase text-[10px]">
-                      Observed (Visual AI Perception):
-                    </span>
+                  <div className="bg-gray-950 p-2.5 rounded border border-gray-800">
+                    <span className="text-gray-500 font-bold uppercase text-[10px] block">Observed (AI):</span>
                     <span
-                      className={`text-sm font-semibold font-mono ${
+                      className={`font-mono font-semibold ${
                         check.status === 'FAIL'
                           ? 'text-rose-400 font-bold'
                           : check.status === 'UNCERTAIN'
@@ -269,42 +365,46 @@ export default async function InspectionReportPage({
                           : 'text-emerald-400'
                       }`}
                     >
-                      {check.observedValue || 'Unable to determine from evidence'}
+                      {check.observedValue || 'Unable to determine'}
                     </span>
                   </div>
                 </div>
 
-                {/* Reason Explanation */}
-                <div className="text-xs text-slate-300 leading-relaxed bg-slate-950/40 p-3 rounded-xl border border-slate-800/80">
-                  <span className="font-bold text-slate-200">Rule Logic Reason: </span>
+                {/* Rule explanation */}
+                <div className="text-xs text-gray-300 bg-gray-950/80 p-2.5 rounded border border-gray-800">
+                  <span className="font-bold text-gray-200">Rule Logic Reason: </span>
                   {check.reason}
                 </div>
 
-                {/* Evidence items */}
+                {/* Evidence References */}
                 {check.evidence && check.evidence.length > 0 && (
-                  <div className="pt-2 border-t border-slate-800/60">
-                    <span className="text-xs font-semibold text-blue-400 flex items-center gap-1.5 mb-2">
-                      <Sparkles className="w-3.5 h-3.5" /> Supporting Visual Evidence Items:
+                  <div className="pt-1 border-t border-gray-800/80">
+                    <span className="text-[11px] font-bold text-blue-400 block mb-2">
+                      Supporting Evidence Items:
                     </span>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                       {check.evidence.map((ev) => (
-                        <div key={ev.id} className="flex gap-3 bg-slate-950 p-2.5 rounded-xl border border-slate-800 items-center">
+                        <div
+                          key={ev.id}
+                          onClick={() => ev.image && openImageModal(ev.image.url)}
+                          className="flex items-center gap-2.5 bg-gray-950 p-2 rounded border border-gray-800 cursor-pointer hover:border-blue-500/50 transition-colors"
+                        >
                           {ev.image ? (
                             <img
                               src={ev.image.url}
-                              alt="Evidence"
-                              className="w-14 h-14 rounded-lg object-cover border border-slate-700 shrink-0"
+                              alt="Evidence thumbnail"
+                              className="w-12 h-12 object-cover rounded border border-gray-800 shrink-0"
                             />
                           ) : (
-                            <div className="w-14 h-14 rounded-lg bg-slate-800 flex items-center justify-center shrink-0">
-                              <Maximize2 className="w-5 h-5 text-slate-500" />
+                            <div className="w-12 h-12 rounded bg-gray-900 flex items-center justify-center shrink-0 text-gray-600">
+                              <Maximize2 className="w-4 h-4" />
                             </div>
                           )}
-                          <div className="text-xs text-slate-300 leading-snug">
+                          <div className="text-[11px] text-gray-300 leading-snug">
                             <p className="line-clamp-2">{ev.observation}</p>
                             {ev.image && (
-                              <span className="text-[10px] text-blue-400 font-mono mt-1 block">
-                                Image Ref: {ev.image.type}
+                              <span className="text-[9px] text-blue-400 font-mono block mt-0.5">
+                                Click to enlarge
                               </span>
                             )}
                           </div>
@@ -319,31 +419,44 @@ export default async function InspectionReportPage({
         </div>
       </div>
 
-      {/* VISUAL EVIDENCE IMAGE GALLERY */}
-      <div className="bg-slate-900/80 rounded-2xl border border-slate-800 p-6 space-y-4">
-        <h2 className="text-lg font-bold text-white flex items-center gap-2">
-          <Maximize2 className="w-5 h-5 text-indigo-400" />
+      {/* ATTACHED INSPECTION PHOTOGRAPHS GALLERY */}
+      <div className="bg-gray-900 rounded border border-gray-800 p-4 space-y-3">
+        <h2 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
+          <Maximize2 className="w-4 h-4 text-gray-400" />
           Attached Inspection Photographs ({inspection.images.length})
         </h2>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           {inspection.images.map((img) => (
-            <div key={img.id} className="group relative bg-slate-950 rounded-xl overflow-hidden border border-slate-800">
+            <div
+              key={img.id}
+              onClick={() => openImageModal(img.url)}
+              className="group relative bg-gray-950 rounded overflow-hidden border border-gray-800 cursor-pointer hover:border-gray-700 transition-colors"
+            >
               <img
                 src={img.url}
                 alt={img.type}
-                className="w-full h-36 object-cover group-hover:scale-105 transition-transform duration-300"
+                className="w-full h-32 object-cover group-hover:scale-105 transition-transform"
               />
-              <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-950 via-slate-950/80 to-transparent p-2.5">
-                <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-blue-500/20 text-blue-300 border border-blue-500/30">
+              <div className="absolute inset-x-0 bottom-0 bg-gray-950/90 p-1.5 border-t border-gray-800">
+                <span className="px-1.5 py-0.5 rounded text-[9px] font-bold font-mono uppercase bg-gray-800 text-gray-300">
                   {img.type}
                 </span>
-                <p className="text-[10px] font-mono text-slate-400 truncate mt-1">{img.storageKey}</p>
+                <p className="text-[9px] font-mono text-gray-400 truncate mt-0.5">{img.storageKey}</p>
               </div>
             </div>
           ))}
         </div>
       </div>
+
+      {/* Full-screen Image Viewer Modal */}
+      <ImageModal
+        isOpen={modalOpen}
+        onClose={() => setModalOpen(false)}
+        images={allGalleryImages}
+        currentIndex={modalIndex}
+        onIndexChange={setModalIndex}
+      />
     </div>
   );
 }
