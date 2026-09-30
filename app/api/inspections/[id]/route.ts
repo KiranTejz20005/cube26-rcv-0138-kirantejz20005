@@ -33,7 +33,7 @@ export async function GET(
     }
 
     return NextResponse.json({ success: true, data: inspection });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error fetching inspection details:', error);
     return NextResponse.json(
       { success: false, error: 'Failed to fetch inspection details.' },

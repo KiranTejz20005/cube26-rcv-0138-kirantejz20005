@@ -17,7 +17,7 @@ export class LocalStorageProvider implements StorageProvider {
     }
   }
 
-  async upload(file: Buffer, filename: string, _mimeType: string): Promise<StorageUploadResult> {
+  async upload(file: Buffer, filename: string): Promise<StorageUploadResult> {
     await this.ensureDir();
     const uniqueName = `${Date.now()}-${filename.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
     const filePath = path.join(this.uploadDir, uniqueName);

@@ -36,10 +36,11 @@ export async function POST(request: Request) {
     const result = await storageProvider.upload(buffer, file.name, file.type);
 
     return NextResponse.json({ success: true, data: result }, { status: 201 });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('File upload failed:', error);
+    const errMsg = error instanceof Error ? error.message : 'File upload failed.';
     return NextResponse.json(
-      { success: false, error: error?.message || 'File upload failed.' },
+      { success: false, error: errMsg },
       { status: 500 }
     );
   }

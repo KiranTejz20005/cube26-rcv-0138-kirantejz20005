@@ -73,7 +73,7 @@ export class GeminiVisionProvider implements VisionProvider {
     const allImages = [...input.referenceImages, ...input.receivingImages];
     const imageParts = await Promise.all(allImages.map((img) => this.getImagePart(img)));
 
-    const contents: any = [
+    const contents = [
       {
         role: 'user',
         parts: [
@@ -99,8 +99,9 @@ export class GeminiVisionProvider implements VisionProvider {
         },
       });
       responseText = response.text || '';
-    } catch (primaryErr: any) {
-      console.warn(`Gemini primary model (${primaryModel}) failed or rate-limited:`, primaryErr?.message || primaryErr);
+    } catch (primaryErr: unknown) {
+      const errMsg = primaryErr instanceof Error ? primaryErr.message : String(primaryErr);
+      console.warn(`Gemini primary model (${primaryModel}) failed or rate-limited:`, errMsg);
       // Attempt fallback model
       try {
         const response = await ai.models.generateContent({
@@ -112,9 +113,10 @@ export class GeminiVisionProvider implements VisionProvider {
           },
         });
         responseText = response.text || '';
-      } catch (fallbackErr: any) {
-        console.error(`Gemini fallback model (${fallbackModel}) also failed:`, fallbackErr?.message || fallbackErr);
-        throw new Error(`Gemini API Error: Quota limits exceeded or API request failed. Message: ${fallbackErr?.message || 'API Error'}`);
+      } catch (fallbackErr: unknown) {
+        const fallMsg = fallbackErr instanceof Error ? fallbackErr.message : String(fallbackErr);
+        console.error(`Gemini fallback model (${fallbackModel}) also failed:`, fallMsg);
+        throw new Error(`Gemini API Error: Quota limits exceeded or API request failed. Message: ${fallMsg}`);
       }
     }
 
@@ -129,7 +131,7 @@ export class GeminiVisionProvider implements VisionProvider {
     let parsedData: unknown;
     try {
       parsedData = JSON.parse(cleanJson);
-    } catch (jsonErr) {
+    } catch {
       console.error('Failed to parse Gemini JSON output:', cleanJson);
       throw new Error('AI Provider returned invalid JSON structure.');
     }

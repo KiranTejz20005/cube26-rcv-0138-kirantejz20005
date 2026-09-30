@@ -42,7 +42,8 @@ export async function GET(
         updatedAt: inspection.updatedAt,
       },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
+    console.error('Fetch result error:', error);
     return NextResponse.json(
       { success: false, error: 'Failed to fetch result.' },
       { status: 500 }

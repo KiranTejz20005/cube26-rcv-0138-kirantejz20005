@@ -119,7 +119,7 @@ export async function runInspectionPipeline(inspectionId: string) {
       overallDecision: decisionResult.overallDecision,
       checks: decisionResult.checks,
     };
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error(`Inspection pipeline failed for ${inspectionId}:`, error);
 
     await prisma.inspection.update({

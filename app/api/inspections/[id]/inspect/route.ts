@@ -9,12 +9,13 @@ export async function POST(
     const { id } = await params;
     const result = await runInspectionPipeline(id);
     return NextResponse.json({ success: true, data: result });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Inspection process failed:', error);
+    const errMsg = error instanceof Error ? error.message : 'AI Inspection process failed. Check API key or DEMO_MODE setting.';
     return NextResponse.json(
       {
         success: false,
-        error: error?.message || 'AI Inspection process failed. Check API key or DEMO_MODE setting.',
+        error: errMsg,
       },
       { status: 500 }
     );

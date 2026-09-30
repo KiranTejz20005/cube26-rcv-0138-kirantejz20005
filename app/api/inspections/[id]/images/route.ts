@@ -35,15 +35,16 @@ export async function POST(
     });
 
     return NextResponse.json({ success: true, data: image }, { status: 201 });
-  } catch (error: any) {
+  } catch (error: unknown) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { success: false, error: 'Validation failed', details: error.issues },
         { status: 400 }
       );
     }
+    const errMsg = error instanceof Error ? error.message : 'Failed to add image.';
     return NextResponse.json(
-      { success: false, error: error?.message || 'Failed to add image.' },
+      { success: false, error: errMsg },
       { status: 500 }
     );
   }

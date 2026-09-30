@@ -68,10 +68,11 @@ export async function POST(request: Request) {
       inspectionIds: createdIds,
       singleInspectionId: createdIds.length === 1 ? createdIds[0] : undefined,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Seed API error:', error);
+    const errMsg = error instanceof Error ? error.message : 'Failed to execute scenario seed';
     return NextResponse.json(
-      { success: false, error: error?.message || 'Failed to execute scenario seed' },
+      { success: false, error: errMsg },
       { status: 500 }
     );
   }

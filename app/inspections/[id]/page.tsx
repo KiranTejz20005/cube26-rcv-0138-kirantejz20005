@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams } from 'next/navigation';
 import { ImageModal } from '@/components/image-modal';
 import {
   CheckCircle2,
@@ -59,7 +59,6 @@ interface InspectionData {
 
 export default function InspectionReportClientPage() {
   const params = useParams();
-  const router = useRouter();
   const id = params.id as string;
 
   const [inspection, setInspection] = useState<InspectionData | null>(null);
@@ -71,25 +70,39 @@ export default function InspectionReportClientPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [modalIndex, setModalIndex] = useState(0);
 
-  const fetchInspection = async () => {
-    try {
-      const res = await fetch(`/api/inspections/${id}`);
-      const data = await res.json();
-      if (data.success && data.data) {
-        setInspection(data.data);
-      } else {
-        setErrorMsg('Inspection record not found.');
-      }
-    } catch (err) {
-      console.error('Fetch error:', err);
-      setErrorMsg('Failed to load inspection details.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
-    if (id) fetchInspection();
+    let isMounted = true;
+
+    async function loadData() {
+      try {
+        const res = await fetch(`/api/inspections/${id}`);
+        const data = await res.json();
+        if (isMounted) {
+          if (data.success && data.data) {
+            setInspection(data.data);
+          } else {
+            setErrorMsg('Inspection record not found.');
+          }
+        }
+      } catch (err: unknown) {
+        if (isMounted) {
+          console.error('Fetch error:', err);
+          setErrorMsg('Failed to load inspection details.');
+        }
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    }
+
+    if (id) {
+      loadData();
+    }
+
+    return () => {
+      isMounted = false;
+    };
   }, [id]);
 
   const handleRetryInspect = async () => {
@@ -101,11 +114,15 @@ export default function InspectionReportClientPage() {
       });
       const data = await res.json();
       if (data.success) {
-        await fetchInspection();
+        const getRes = await fetch(`/api/inspections/${id}`);
+        const getData = await getRes.json();
+        if (getData.success && getData.data) {
+          setInspection(getData.data);
+        }
       } else {
         setErrorMsg(`Retry failed: ${data.error || 'Server error'}`);
       }
-    } catch (err) {
+    } catch (err: unknown) {
       console.error('Retry error:', err);
       setErrorMsg('Error retrying inspection.');
     } finally {
@@ -390,6 +407,7 @@ export default function InspectionReportClientPage() {
                           className="flex items-center gap-2.5 bg-gray-950 p-2 rounded border border-gray-800 cursor-pointer hover:border-blue-500/50 transition-colors"
                         >
                           {ev.image ? (
+                            /* eslint-disable-next-line @next/next/no-img-element */
                             <img
                               src={ev.image.url}
                               alt="Evidence thumbnail"
@@ -433,6 +451,7 @@ export default function InspectionReportClientPage() {
               onClick={() => openImageModal(img.url)}
               className="group relative bg-gray-950 rounded overflow-hidden border border-gray-800 cursor-pointer hover:border-gray-700 transition-colors"
             >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={img.url}
                 alt={img.type}

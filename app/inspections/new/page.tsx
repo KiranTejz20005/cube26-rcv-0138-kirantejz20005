@@ -10,7 +10,6 @@ import {
   Loader2,
   X,
   FileCheck,
-  CheckCircle2,
   ChevronRight,
   ChevronLeft,
   AlertCircle,
@@ -99,7 +98,7 @@ export default function NewInspectionPage() {
           setErrorMsg(`Upload failed for ${file.name}: ${data.error || 'Server error'}`);
         }
       }
-    } catch (err) {
+    } catch (err: unknown) {
       console.error('Upload error:', err);
       setErrorMsg('Network error uploading file.');
     } finally {
@@ -181,9 +180,10 @@ export default function NewInspectionPage() {
 
       setProcessingStatus('COMPLETED');
       router.push(`/inspections/${inspectionId}`);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Inspection submission error:', err);
-      setErrorMsg(err.message || 'Inspection failed. Please check network or GEMINI_API_KEY.');
+      const errMsg = err instanceof Error ? err.message : 'Inspection failed. Please check network or GEMINI_API_KEY.';
+      setErrorMsg(errMsg);
       setSubmitting(false);
       setProcessingStatus('FAILED');
     }
@@ -383,6 +383,7 @@ export default function NewInspectionPage() {
               <div className="flex flex-wrap gap-2 pt-2">
                 {refImages.map((img, idx) => (
                   <div key={idx} className="relative group w-20 h-20 rounded border border-gray-800 overflow-hidden bg-gray-950">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={img.url} alt="Ref" className="w-full h-full object-cover" />
                     <button
                       type="button"
@@ -430,6 +431,7 @@ export default function NewInspectionPage() {
               <div className="flex flex-wrap gap-2 pt-2">
                 {recImages.map((img, idx) => (
                   <div key={idx} className="relative group w-20 h-20 rounded border border-gray-800 overflow-hidden bg-gray-950">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={img.url} alt="Rec" className="w-full h-full object-cover" />
                     <button
                       type="button"

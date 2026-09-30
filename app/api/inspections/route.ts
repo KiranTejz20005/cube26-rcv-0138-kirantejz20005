@@ -31,7 +31,7 @@ export async function GET() {
     });
 
     return NextResponse.json({ success: true, data: inspections });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error fetching inspections:', error);
     return NextResponse.json(
       { success: false, error: 'Failed to fetch inspections.' },
@@ -74,16 +74,17 @@ export async function POST(request: Request) {
     });
 
     return NextResponse.json({ success: true, data: inspection }, { status: 201 });
-  } catch (error: any) {
+  } catch (error: unknown) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { success: false, error: 'Validation failed', details: error.issues },
         { status: 400 }
       );
     }
+    const errMsg = error instanceof Error ? error.message : 'Failed to create inspection.';
     console.error('Error creating inspection:', error);
     return NextResponse.json(
-      { success: false, error: error?.message || 'Failed to create inspection.' },
+      { success: false, error: errMsg },
       { status: 500 }
     );
   }

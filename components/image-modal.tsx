@@ -58,6 +58,7 @@ export function ImageModal({
 
       {/* Image Container */}
       <div className="max-w-4xl max-h-[85vh] flex flex-col items-center">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={activeImage.url}
           alt={activeImage.label || 'Inspection Evidence Image'}
