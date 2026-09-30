@@ -1,0 +1,79 @@
+// Prisma Schema for AI-Powered Receiving Manager
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Inspection {
+  id              String            @id @default(cuid())
+  status          String            @default("DRAFT") // DRAFT, PROCESSING, COMPLETED, FAILED
+  overallDecision String?           // PASS, EXCEPTION, UNCERTAIN
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+
+  purchaseOrder   PurchaseOrder?
+  images          InspectionImage[]
+  checks          InspectionCheck[]
+
+  @@index([createdAt])
+  @@index([overallDecision])
+}
+
+model PurchaseOrder {
+  id               String     @id @default(cuid())
+  inspectionId     String     @unique
+  inspection       Inspection @relation(fields: [inspectionId], references: [id], onDelete: Cascade)
+  orderNumber      String
+  sku              String
+  productName      String?
+  expectedQuantity Int
+  expectedVariant  String?
+
+  createdAt        DateTime   @default(now())
+}
+
+model InspectionImage {
+  id           String               @id @default(cuid())
+  inspectionId String
+  inspection   Inspection           @relation(fields: [inspectionId], references: [id], onDelete: Cascade)
+  type         String               // REFERENCE, RECEIVING
+  storageKey   String
+  url          String
+  createdAt    DateTime             @default(now())
+
+  evidenceItems InspectionEvidence[]
+
+  @@index([inspectionId])
+}
+
+model InspectionCheck {
+  id            String               @id @default(cuid())
+  inspectionId  String
+  inspection    Inspection           @relation(fields: [inspectionId], references: [id], onDelete: Cascade)
+  type          String               // SKU, QUANTITY, VARIANT, DAMAGE, COMPONENTS
+  status        String               // PASS, FAIL, UNCERTAIN
+  expectedValue String
+  observedValue String?
+  confidence    Float                @default(1.0)
+  reason        String
+
+  evidence      InspectionEvidence[]
+
+  @@index([inspectionId])
+}
+
+model InspectionEvidence {
+  id          String           @id @default(cuid())
+  checkId     String
+  check       InspectionCheck  @relation(fields: [checkId], references: [id], onDelete: Cascade)
+  imageId     String?
+  image       InspectionImage? @relation(fields: [imageId], references: [id], onDelete: SetNull)
+  observation String
+
+  @@index([checkId])
+}
