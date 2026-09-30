@@ -54,12 +54,6 @@ export function Header() {
             })}
           </nav>
 
-          {/* Mode Badge */}
-          <div className="hidden sm:flex items-center gap-2">
-            <span className="px-2 py-0.5 rounded bg-slate-100 border border-slate-200 text-[10px] font-mono font-medium text-slate-700">
-              Demo / Gemini Provider
-            </span>
-          </div>
         </div>
       </div>
     </header>

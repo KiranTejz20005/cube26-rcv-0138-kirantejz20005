@@ -5,6 +5,11 @@ import { Header } from '@/components/header';
 export const metadata: Metadata = {
   title: 'Receiving Manager | AI Visual Receiving Inspection System',
   description: 'Evidence-backed visual receiving inspection application with deterministic decision logic.',
+  icons: {
+    icon: '/icon.svg',
+    shortcut: '/icon.svg',
+    apple: '/icon.svg',
+  },
 };
 
 export default function RootLayout({
@@ -50,7 +55,7 @@ export default function RootLayout({
         </main>
         <footer className="border-t border-slate-200 bg-white py-4" suppressHydrationWarning>
           <div className="max-w-7xl mx-auto px-4 text-center text-xs text-slate-500" suppressHydrationWarning>
-            Receiving Manager &copy; {new Date().getFullYear()} &bull; AI Visual Receiving Inspection &bull; Zero-Budget Architecture &bull; Deterministic Business Logic
+            Built for Cube Hackathon 2026 by Kiran Teja &bull; Receiving Manager &bull; AI Visual Receiving Inspection Engine
           </div>
         </footer>
       </body>

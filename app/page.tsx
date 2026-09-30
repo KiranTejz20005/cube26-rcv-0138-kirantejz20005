@@ -22,7 +22,7 @@ export default async function DashboardPage() {
       purchaseOrder: true,
       checks: true,
     },
-    take: 20,
+    take: 10,
   });
 
   const totalCount = inspections.length;

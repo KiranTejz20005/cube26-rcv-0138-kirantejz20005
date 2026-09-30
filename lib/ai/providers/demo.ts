@@ -89,13 +89,13 @@ export class DemoVisionProvider implements VisionProvider {
           confidence: 0.95,
         },
         components: {
-          missing: ['User Manual', 'Safety Key'],
+          missing: ['Cleaning Brush', 'Carrying Strap'],
           confidence: 0.94,
         },
         evidence: [
           {
             imageId: receivingImgId,
-            observation: 'Product container and bottle present, but user manual slot in packaging insert is empty.',
+            observation: 'Product container present, but cleaning brush and carrying strap slots in insert are empty.',
             field: 'components',
           },
         ],
@@ -103,8 +103,43 @@ export class DemoVisionProvider implements VisionProvider {
       };
     }
 
-    // Scenario 3: Wrong variant check (PO contains WRONG-VAR or RED)
-    if (poNum.includes('WRONG_VAR') || poNum.includes('VARIANT') || (variantUpper === 'blue' && poNum.includes('RED'))) {
+    // Scenario 4: Wrong SKU check (PO contains WRONG_SKU or MISMATCH)
+    if (poNum.includes('WRONG_SKU') || skuUpper.includes('MISMATCH')) {
+      return {
+        product: {
+          observedSku: 'LOGI-MX-ANYWHERE',
+          confidence: 0.98,
+        },
+        quantity: {
+          observed: purchaseOrder.expectedQuantity,
+          confidence: 0.95,
+        },
+        variant: {
+          observed: purchaseOrder.expectedVariant || 'Graphite',
+          confidence: 0.9,
+        },
+        condition: {
+          damaged: false,
+          damageTypes: [],
+          confidence: 0.95,
+        },
+        components: {
+          missing: [],
+          confidence: 0.95,
+        },
+        evidence: [
+          {
+            imageId: receivingImgId,
+            observation: 'Scanned shipping label reads LOGI-MX-ANYWHERE instead of expected LOGI-MX-MASTER3.',
+            field: 'product',
+          },
+        ],
+        uncertainty: [],
+      };
+    }
+
+    // Scenario 3: Wrong variant check (PO contains WRONG_VAR or VARIANT)
+    if (poNum.includes('WRONG_VAR') || (variantUpper === 'blue' && poNum.includes('RED'))) {
       return {
         product: {
           observedSku: purchaseOrder.sku,
@@ -138,25 +173,26 @@ export class DemoVisionProvider implements VisionProvider {
       };
     }
 
-    // Scenario 4: Wrong SKU check (PO contains WRONG_SKU)
-    if (poNum.includes('WRONG_SKU') || skuUpper.includes('MISMATCH')) {
+    // Scenario 2: Short quantity + Damaged carton (PO contains SHORT or DAMAGE)
+    if (poNum.includes('SHORT') || poNum.includes('DAMAGE')) {
+      const observedCount = Math.max(1, purchaseOrder.expectedQuantity - 4);
       return {
         product: {
-          observedSku: 'RED-BOTTLE-001',
+          observedSku: purchaseOrder.sku,
           confidence: 0.98,
         },
         quantity: {
-          observed: purchaseOrder.expectedQuantity,
+          observed: observedCount,
           confidence: 0.95,
         },
         variant: {
-          observed: purchaseOrder.expectedVariant || 'Red',
-          confidence: 0.9,
+          observed: purchaseOrder.expectedVariant || 'Dark Grey',
+          confidence: 0.92,
         },
         condition: {
-          damaged: false,
-          damageTypes: [],
-          confidence: 0.95,
+          damaged: true,
+          damageTypes: ['crushed_carton_corner'],
+          confidence: 0.96,
         },
         components: {
           missing: [],
@@ -165,57 +201,20 @@ export class DemoVisionProvider implements VisionProvider {
         evidence: [
           {
             imageId: receivingImgId,
-            observation: 'Scanned shipping label reads RED-BOTTLE-001 instead of expected BLUE-BOTTLE-001.',
-            field: 'product',
+            observation: `Counted ${observedCount} units in master case (expected ${purchaseOrder.expectedQuantity}).`,
+            field: 'quantity',
+          },
+          {
+            imageId: receivingImgId,
+            observation: 'Lower-right corner of outer shipping carton is visibly crushed and torn.',
+            field: 'condition',
           },
         ],
         uncertainty: [],
       };
     }
 
-    // Scenario 2: Short quantity + Damaged carton (PO contains SHORT or DAMAGE)
-    if (poNum.includes('SHORT') || poNum.includes('DAMAGE') || purchaseOrder.expectedQuantity > 20) {
-      if (purchaseOrder.expectedQuantity === 24) {
-        return {
-          product: {
-            observedSku: purchaseOrder.sku,
-            confidence: 0.98,
-          },
-          quantity: {
-            observed: 22,
-            confidence: 0.95,
-          },
-          variant: {
-            observed: purchaseOrder.expectedVariant || 'Blue',
-            confidence: 0.92,
-          },
-          condition: {
-            damaged: true,
-            damageTypes: ['crushed_carton_corner'],
-            confidence: 0.96,
-          },
-          components: {
-            missing: [],
-            confidence: 0.95,
-          },
-          evidence: [
-            {
-              imageId: receivingImgId,
-              observation: 'Counted 22 individual bottles arranged on top tray (expected 24).',
-              field: 'quantity',
-            },
-            {
-              imageId: receivingImgId,
-              observation: 'Lower-right corner of outer shipping carton is visibly crushed and torn.',
-              field: 'condition',
-            },
-          ],
-          uncertainty: [],
-        };
-      }
-    }
-
-    // Scenario 1: Default PERFECT MATCH / PASS
+    // Scenario 1 & Default: PERFECT MATCH / PASS
     return {
       product: {
         observedSku: purchaseOrder.sku,
