@@ -1,18 +1,18 @@
 @import "tailwindcss";
 
 :root {
-  --background: #090d16;
-  --foreground: #f1f5f9;
-  --surface: #111827;
-  --surface-hover: #1f2937;
-  --border: #1f2937;
-  --border-strong: #374151;
+  --background: #f8fafc;
+  --foreground: #0f172a;
+  --surface: #ffffff;
+  --surface-hover: #f1f5f9;
+  --border: #e2e8f0;
+  --border-strong: #cbd5e1;
   --primary: #2563eb;
   --primary-hover: #1d4ed8;
   --muted: #64748b;
-  --pass: #10b981;
-  --exception: #ef4444;
-  --uncertain: #f59e0b;
+  --pass: #059669;
+  --exception: #dc2626;
+  --uncertain: #d97706;
 }
 
 body {
@@ -29,28 +29,28 @@ body {
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #090d16;
+  background: #f8fafc;
 }
 ::-webkit-scrollbar-thumb {
-  background: #1f2937;
+  background: #cbd5e1;
   border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #374151;
+  background: #94a3b8;
 }
 
-/* Operations Solid Panel Base */
+/* Light Operations Panel Base */
 .ops-panel {
-  background-color: #111827;
-  border: 1px solid #1f2937;
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
 }
 
 .ops-card {
-  background-color: #111827;
-  border: 1px solid #1f2937;
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
   transition: border-color 0.15s ease;
 }
 
 .ops-card:hover {
-  border-color: #374151;
+  border-color: #cbd5e1;
 }

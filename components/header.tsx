@@ -14,19 +14,19 @@ export function Header() {
   ];
 
   return (
-    <header className="sticky top-0 z-40 bg-gray-900 border-b border-gray-800">
+    <header className="sticky top-0 z-40 bg-white border-b border-slate-200 shadow-2xs">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-14">
           {/* Brand Logo */}
           <Link href="/" className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded bg-blue-600 flex items-center justify-center text-white">
+            <div className="w-8 h-8 rounded bg-blue-600 flex items-center justify-center text-white font-bold shadow-2xs">
               <PackageCheck className="w-5 h-5" />
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-sm font-bold tracking-tight text-white">
+              <span className="text-sm font-bold tracking-tight text-slate-900">
                 Receiving Manager
               </span>
-              <span className="hidden sm:inline-block text-[11px] font-mono text-gray-400 border-l border-gray-700 pl-2">
+              <span className="hidden sm:inline-block text-[11px] font-mono text-slate-500 border-l border-slate-200 pl-2">
                 Visual Inspection Engine
               </span>
             </div>
@@ -43,8 +43,8 @@ export function Header() {
                   href={item.href}
                   className={`flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-semibold transition-colors ${
                     isActive
-                      ? 'bg-gray-800 text-blue-400 border border-gray-700'
-                      : 'text-gray-300 hover:text-white hover:bg-gray-800/60'
+                      ? 'bg-blue-50 text-blue-700 border border-blue-200'
+                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
                   }`}
                 >
                   <Icon className="w-3.5 h-3.5" />
@@ -56,7 +56,7 @@ export function Header() {
 
           {/* Mode Badge */}
           <div className="hidden sm:flex items-center gap-2">
-            <span className="px-2 py-0.5 rounded bg-gray-800 border border-gray-700 text-[10px] font-mono font-medium text-gray-300">
+            <span className="px-2 py-0.5 rounded bg-slate-100 border border-slate-200 text-[10px] font-mono font-medium text-slate-700">
               Demo / Gemini Provider
             </span>
           </div>

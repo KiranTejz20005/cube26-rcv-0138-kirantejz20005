@@ -203,11 +203,11 @@ export default function NewInspectionPage() {
     <div className="max-w-4xl mx-auto space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-xl font-bold text-white flex items-center gap-2">
-          <FileCheck className="w-5 h-5 text-blue-400" />
+        <h1 className="text-xl font-bold text-slate-900 flex items-center gap-2">
+          <FileCheck className="w-5 h-5 text-blue-600" />
           Create Receiving Inspection
         </h1>
-        <p className="text-xs text-gray-400 mt-0.5">
+        <p className="text-xs text-slate-500 mt-0.5">
           Enter Purchase Order expectations and upload shipment photographs for visual verification.
         </p>
       </div>
@@ -216,7 +216,7 @@ export default function NewInspectionPage() {
       <ScenarioSelector onSelectPreset={handleSelectPreset} />
 
       {/* Step Stepper Indicator */}
-      <div className="bg-gray-900 rounded border border-gray-800 p-3 flex items-center justify-between text-xs">
+      <div className="bg-white rounded border border-slate-200 p-3 flex items-center justify-between text-xs shadow-2xs">
         {wizardSteps.map((s) => (
           <button
             key={s.num}
@@ -230,12 +230,12 @@ export default function NewInspectionPage() {
               step === s.num
                 ? 'bg-blue-600 text-white font-bold'
                 : step > s.num
-                ? 'bg-gray-800 text-gray-200 font-semibold'
-                : 'text-gray-500 hover:text-gray-300'
+                ? 'bg-slate-100 text-slate-800 font-semibold border border-slate-200'
+                : 'text-slate-400 hover:text-slate-600'
             }`}
           >
             <span className={`w-5 h-5 rounded-full text-[10px] flex items-center justify-center border ${
-              step === s.num ? 'border-white bg-blue-700' : 'border-gray-700 bg-gray-950'
+              step === s.num ? 'border-white bg-blue-700' : 'border-slate-300 bg-slate-50'
             }`}>
               {s.num}
             </span>
@@ -246,13 +246,13 @@ export default function NewInspectionPage() {
 
       {/* Error Alert Message */}
       {errorMsg && (
-        <div className="bg-rose-950/60 border border-rose-800 p-3 rounded text-xs text-rose-300 flex items-start gap-2">
-          <AlertCircle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
+        <div className="bg-rose-50 border border-rose-200 p-3 rounded text-xs text-rose-700 flex items-start gap-2">
+          <AlertCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
           <div className="flex-1">
             <span className="font-bold">Error: </span>
             {errorMsg}
           </div>
-          <button onClick={() => setErrorMsg(null)} className="text-rose-400 hover:text-rose-200">
+          <button onClick={() => setErrorMsg(null)} className="text-rose-600 hover:text-rose-800">
             <X className="w-3.5 h-3.5" />
           </button>
         </div>
@@ -260,15 +260,15 @@ export default function NewInspectionPage() {
 
       {/* Submitting Loading Overlay */}
       {submitting && (
-        <div className="bg-gray-900 border border-gray-800 p-8 rounded text-center space-y-4">
-          <Loader2 className="w-8 h-8 text-blue-400 animate-spin mx-auto" />
+        <div className="bg-white border border-slate-200 p-8 rounded text-center space-y-4 shadow-2xs">
+          <Loader2 className="w-8 h-8 text-blue-600 animate-spin mx-auto" />
           <div>
-            <h3 className="text-sm font-bold text-white">Processing Visual Inspection Pipeline</h3>
-            <p className="text-xs text-gray-400 mt-1">
-              Current Stage: <span className="font-mono text-blue-400 font-bold">{processingStatus}</span>
+            <h3 className="text-sm font-bold text-slate-900">Processing Visual Inspection Pipeline</h3>
+            <p className="text-xs text-slate-500 mt-1">
+              Current Stage: <span className="font-mono text-blue-600 font-bold">{processingStatus}</span>
             </p>
           </div>
-          <p className="text-[11px] text-gray-500">
+          <p className="text-[11px] text-slate-500">
             Analyzing shipment photographs &bull; Zod validation &bull; Deterministic business rules
           </p>
         </div>
@@ -278,15 +278,15 @@ export default function NewInspectionPage() {
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* STEP 1: PO DETAILS */}
           {step === 1 && (
-            <div className="bg-gray-900 rounded border border-gray-800 p-5 space-y-4">
-              <h2 className="text-sm font-bold text-white border-b border-gray-800 pb-2">
+            <div className="bg-white rounded border border-slate-200 p-5 space-y-4 shadow-2xs">
+              <h2 className="text-sm font-bold text-slate-900 border-b border-slate-200 pb-2">
                 Step 1: Purchase Order Expectations
               </h2>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-semibold text-gray-300 mb-1">
-                    PO Number <span className="text-rose-400">*</span>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                    PO Number <span className="text-rose-600">*</span>
                   </label>
                   <input
                     type="text"
@@ -294,13 +294,13 @@ export default function NewInspectionPage() {
                     value={orderNumber}
                     onChange={(e) => setOrderNumber(e.target.value)}
                     placeholder="e.g. PO-2026-001"
-                    className="w-full bg-gray-950 border border-gray-800 rounded px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500 font-mono"
+                    className="w-full bg-slate-50 border border-slate-300 rounded px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-blue-600 font-mono"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-gray-300 mb-1">
-                    Expected SKU <span className="text-rose-400">*</span>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                    Expected SKU <span className="text-rose-600">*</span>
                   </label>
                   <input
                     type="text"
@@ -308,25 +308,25 @@ export default function NewInspectionPage() {
                     value={sku}
                     onChange={(e) => setSku(e.target.value)}
                     placeholder="e.g. BLUE-BOTTLE-001"
-                    className="w-full bg-gray-950 border border-gray-800 rounded px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500 font-mono"
+                    className="w-full bg-slate-50 border border-slate-300 rounded px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-blue-600 font-mono"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-gray-300 mb-1">Product Name</label>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">Product Name</label>
                   <input
                     type="text"
                     value={productName}
                     onChange={(e) => setProductName(e.target.value)}
                     placeholder="e.g. Eco Stainless Water Bottle"
-                    className="w-full bg-gray-950 border border-gray-800 rounded px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500"
+                    className="w-full bg-slate-50 border border-slate-300 rounded px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-blue-600"
                   />
                 </div>
 
                 <div className="grid grid-cols-2 gap-2">
                   <div>
-                    <label className="block text-xs font-semibold text-gray-300 mb-1">
-                      Expected Qty <span className="text-rose-400">*</span>
+                    <label className="block text-xs font-semibold text-slate-700 mb-1">
+                      Expected Qty <span className="text-rose-600">*</span>
                     </label>
                     <input
                       type="number"
@@ -334,18 +334,18 @@ export default function NewInspectionPage() {
                       required
                       value={expectedQuantity}
                       onChange={(e) => setExpectedQuantity(Number(e.target.value))}
-                      className="w-full bg-gray-950 border border-gray-800 rounded px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500 font-mono"
+                      className="w-full bg-slate-50 border border-slate-300 rounded px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-blue-600 font-mono"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-xs font-semibold text-gray-300 mb-1">Expected Variant</label>
+                    <label className="block text-xs font-semibold text-slate-700 mb-1">Expected Variant</label>
                     <input
                       type="text"
                       value={expectedVariant}
                       onChange={(e) => setExpectedVariant(e.target.value)}
                       placeholder="e.g. Blue"
-                      className="w-full bg-gray-950 border border-gray-800 rounded px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500"
+                      className="w-full bg-slate-50 border border-slate-300 rounded px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-blue-600"
                     />
                   </div>
                 </div>
@@ -355,15 +355,15 @@ export default function NewInspectionPage() {
 
           {/* STEP 2: REFERENCE IMAGES */}
           {step === 2 && (
-            <div className="bg-gray-900 rounded border border-gray-800 p-5 space-y-4">
-              <h2 className="text-sm font-bold text-white border-b border-gray-800 pb-2">
+            <div className="bg-white rounded border border-slate-200 p-5 space-y-4 shadow-2xs">
+              <h2 className="text-sm font-bold text-slate-900 border-b border-slate-200 pb-2">
                 Step 2: Upload Product Reference Images (Optional)
               </h2>
-              <p className="text-xs text-gray-400">
+              <p className="text-xs text-slate-500">
                 Upload official product spec sheets, standard packaging photos, or master reference diagrams.
               </p>
 
-              <div className="border border-dashed border-gray-800 hover:border-gray-700 rounded p-6 text-center bg-gray-950/60">
+              <div className="border border-dashed border-slate-300 hover:border-slate-400 rounded p-6 text-center bg-slate-50">
                 <input
                   type="file"
                   accept="image/*"
@@ -373,26 +373,26 @@ export default function NewInspectionPage() {
                   className="hidden"
                 />
                 <label htmlFor="ref-upload-file" className="cursor-pointer space-y-2 block">
-                  <ImageIcon className="w-8 h-8 text-gray-500 mx-auto" />
-                  <span className="text-xs text-blue-400 font-semibold block">Click to upload reference image</span>
-                  <span className="text-[10px] text-gray-500 block">PNG, JPG, WebP up to 10MB</span>
+                  <ImageIcon className="w-8 h-8 text-slate-400 mx-auto" />
+                  <span className="text-xs text-blue-600 font-bold block">Click to upload reference image</span>
+                  <span className="text-[10px] text-slate-500 block">PNG, JPG, WebP up to 10MB</span>
                 </label>
               </div>
 
               {/* Reference thumbnails */}
               <div className="flex flex-wrap gap-2 pt-2">
                 {refImages.map((img, idx) => (
-                  <div key={idx} className="relative group w-20 h-20 rounded border border-gray-800 overflow-hidden bg-gray-950">
+                  <div key={idx} className="relative group w-20 h-20 rounded border border-slate-200 overflow-hidden bg-slate-50">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={img.url} alt="Ref" className="w-full h-full object-cover" />
                     <button
                       type="button"
                       onClick={() => removeImage(images.indexOf(img))}
-                      className="absolute top-1 right-1 p-0.5 rounded bg-gray-900 text-rose-400 hover:bg-rose-600 hover:text-white transition-colors"
+                      className="absolute top-1 right-1 p-0.5 rounded bg-white text-rose-600 hover:bg-rose-600 hover:text-white border border-slate-200 shadow-2xs transition-colors"
                     >
                       <X className="w-3.5 h-3.5" />
                     </button>
-                    <span className="absolute bottom-0 inset-x-0 bg-gray-900 text-[9px] text-center text-gray-400 py-0.5 font-mono">
+                    <span className="absolute bottom-0 inset-x-0 bg-slate-100 text-[9px] text-center text-slate-700 py-0.5 font-mono font-medium border-t border-slate-200">
                       Reference
                     </span>
                   </div>
@@ -403,15 +403,15 @@ export default function NewInspectionPage() {
 
           {/* STEP 3: RECEIVING IMAGES */}
           {step === 3 && (
-            <div className="bg-gray-900 rounded border border-gray-800 p-5 space-y-4">
-              <h2 className="text-sm font-bold text-white border-b border-gray-800 pb-2">
-                Step 3: Upload Receiving / Shipment Evidence Photos <span className="text-rose-400">*</span>
+            <div className="bg-white rounded border border-slate-200 p-5 space-y-4 shadow-2xs">
+              <h2 className="text-sm font-bold text-slate-900 border-b border-slate-200 pb-2">
+                Step 3: Upload Receiving / Shipment Evidence Photos <span className="text-rose-600">*</span>
               </h2>
-              <p className="text-xs text-gray-400">
+              <p className="text-xs text-slate-500">
                 Upload photographs of the received shipment carton, barcode shipping label, contents, or damaged packaging.
               </p>
 
-              <div className="border border-dashed border-gray-800 hover:border-gray-700 rounded p-6 text-center bg-gray-950/60">
+              <div className="border border-dashed border-slate-300 hover:border-slate-400 rounded p-6 text-center bg-slate-50">
                 <input
                   type="file"
                   accept="image/*"
@@ -421,26 +421,26 @@ export default function NewInspectionPage() {
                   className="hidden"
                 />
                 <label htmlFor="rec-upload-file" className="cursor-pointer space-y-2 block">
-                  <Upload className="w-8 h-8 text-gray-500 mx-auto" />
-                  <span className="text-xs text-blue-400 font-semibold block">Click to upload receiving shipment photo</span>
-                  <span className="text-[10px] text-gray-500 block">Box, shipping label, contents photo</span>
+                  <Upload className="w-8 h-8 text-slate-400 mx-auto" />
+                  <span className="text-xs text-blue-600 font-bold block">Click to upload receiving shipment photo</span>
+                  <span className="text-[10px] text-slate-500 block">Box, shipping label, contents photo</span>
                 </label>
               </div>
 
               {/* Receiving thumbnails */}
               <div className="flex flex-wrap gap-2 pt-2">
                 {recImages.map((img, idx) => (
-                  <div key={idx} className="relative group w-20 h-20 rounded border border-gray-800 overflow-hidden bg-gray-950">
+                  <div key={idx} className="relative group w-20 h-20 rounded border border-slate-200 overflow-hidden bg-slate-50">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={img.url} alt="Rec" className="w-full h-full object-cover" />
                     <button
                       type="button"
                       onClick={() => removeImage(images.indexOf(img))}
-                      className="absolute top-1 right-1 p-0.5 rounded bg-gray-900 text-rose-400 hover:bg-rose-600 hover:text-white transition-colors"
+                      className="absolute top-1 right-1 p-0.5 rounded bg-white text-rose-600 hover:bg-rose-600 hover:text-white border border-slate-200 shadow-2xs transition-colors"
                     >
                       <X className="w-3.5 h-3.5" />
                     </button>
-                    <span className="absolute bottom-0 inset-x-0 bg-gray-950 text-[9px] text-center text-blue-400 py-0.5 font-mono font-bold">
+                    <span className="absolute bottom-0 inset-x-0 bg-blue-50 text-[9px] text-center text-blue-700 py-0.5 font-mono font-bold border-t border-blue-200">
                       Shipment
                     </span>
                   </div>
@@ -451,33 +451,33 @@ export default function NewInspectionPage() {
 
           {/* STEP 4: REVIEW & CONFIRM */}
           {step === 4 && (
-            <div className="bg-gray-900 rounded border border-gray-800 p-5 space-y-5">
-              <h2 className="text-sm font-bold text-white border-b border-gray-800 pb-2">
+            <div className="bg-white rounded border border-slate-200 p-5 space-y-5 shadow-2xs">
+              <h2 className="text-sm font-bold text-slate-900 border-b border-slate-200 pb-2">
                 Step 4: Review Inputs &amp; Confirm Execution
               </h2>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
-                <div className="bg-gray-950 p-3.5 rounded border border-gray-800 space-y-1.5">
-                  <span className="text-gray-500 font-bold uppercase text-[10px] block">PO Expectations:</span>
-                  <div><span className="text-gray-400">PO Number:</span> <span className="text-white font-mono font-bold">{orderNumber || 'N/A'}</span></div>
-                  <div><span className="text-gray-400">SKU:</span> <span className="text-blue-400 font-mono font-bold">{sku || 'N/A'}</span></div>
-                  <div><span className="text-gray-400">Product:</span> <span className="text-gray-200">{productName || 'Standard Item'}</span></div>
-                  <div><span className="text-gray-400">Expected Quantity:</span> <span className="text-white font-bold">{expectedQuantity}</span></div>
-                  <div><span className="text-gray-400">Expected Variant:</span> <span className="text-white">{expectedVariant || 'Standard'}</span></div>
+                <div className="bg-slate-50 p-3.5 rounded border border-slate-200 space-y-1.5">
+                  <span className="text-slate-500 font-bold uppercase text-[10px] block">PO Expectations:</span>
+                  <div><span className="text-slate-600">PO Number:</span> <span className="text-slate-900 font-mono font-bold">{orderNumber || 'N/A'}</span></div>
+                  <div><span className="text-slate-600">SKU:</span> <span className="text-blue-700 font-mono font-bold">{sku || 'N/A'}</span></div>
+                  <div><span className="text-slate-600">Product:</span> <span className="text-slate-800">{productName || 'Standard Item'}</span></div>
+                  <div><span className="text-slate-600">Expected Quantity:</span> <span className="text-slate-900 font-bold">{expectedQuantity}</span></div>
+                  <div><span className="text-slate-600">Expected Variant:</span> <span className="text-slate-900">{expectedVariant || 'Standard'}</span></div>
                 </div>
 
-                <div className="bg-gray-950 p-3.5 rounded border border-gray-800 space-y-2">
-                  <span className="text-gray-500 font-bold uppercase text-[10px] block">Attached Images:</span>
-                  <div className="flex items-center justify-between text-gray-300">
+                <div className="bg-slate-50 p-3.5 rounded border border-slate-200 space-y-2">
+                  <span className="text-slate-500 font-bold uppercase text-[10px] block">Attached Images:</span>
+                  <div className="flex items-center justify-between text-slate-700">
                     <span>Reference Specs:</span>
-                    <span className="font-mono font-bold text-white">{refImages.length} images</span>
+                    <span className="font-mono font-bold text-slate-900">{refImages.length} images</span>
                   </div>
-                  <div className="flex items-center justify-between text-gray-300">
+                  <div className="flex items-center justify-between text-slate-700">
                     <span>Shipment Evidence:</span>
-                    <span className="font-mono font-bold text-blue-400">{recImages.length} images</span>
+                    <span className="font-mono font-bold text-blue-700">{recImages.length} images</span>
                   </div>
                   {recImages.length === 0 && (
-                    <p className="text-rose-400 text-[11px] mt-1">
+                    <p className="text-rose-600 text-[11px] font-semibold mt-1">
                       ⚠️ Warning: At least 1 receiving photo is required.
                     </p>
                   )}
@@ -492,7 +492,7 @@ export default function NewInspectionPage() {
               <button
                 type="button"
                 onClick={handleStepPrev}
-                className="flex items-center gap-1 px-4 py-2 rounded text-xs font-semibold bg-gray-800 hover:bg-gray-700 text-gray-300 transition-colors"
+                className="flex items-center gap-1 px-4 py-2 rounded text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 transition-colors"
               >
                 <ChevronLeft className="w-4 h-4" /> Previous Step
               </button>
@@ -502,7 +502,7 @@ export default function NewInspectionPage() {
               <button
                 type="button"
                 onClick={handleStepNext}
-                className="flex items-center gap-1 px-5 py-2 rounded text-xs font-bold bg-blue-600 hover:bg-blue-500 text-white transition-colors"
+                className="flex items-center gap-1 px-5 py-2 rounded text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white transition-colors"
               >
                 Next Step <ChevronRight className="w-4 h-4" />
               </button>
@@ -510,7 +510,7 @@ export default function NewInspectionPage() {
               <button
                 type="submit"
                 disabled={submitting || uploading}
-                className="flex items-center gap-2 px-6 py-2.5 rounded text-xs font-bold bg-blue-600 hover:bg-blue-500 text-white transition-colors disabled:opacity-50"
+                className="flex items-center gap-2 px-6 py-2.5 rounded text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white shadow-2xs transition-colors disabled:opacity-50"
               >
                 <Play className="w-4 h-4 fill-white" />
                 Run AI Inspection Engine
