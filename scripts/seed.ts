@@ -1,8 +1,6 @@
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '../lib/db/prisma';
 import { DEMO_SCENARIOS } from '../lib/inspection/fixtures';
 import { runInspectionPipeline } from '../lib/inspection/analyzer';
-
-const prisma = new PrismaClient();
 
 async function main() {
   console.log('🌱 Seeding database with Receiving Manager scenarios...');
