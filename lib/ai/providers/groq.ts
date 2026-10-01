@@ -53,7 +53,7 @@ export class GroqVisionProvider implements VisionProvider {
       ],
       response_format: { type: 'json_object' },
       temperature: 0.1,
-      max_tokens: 1024,
+      max_tokens: 800,
     };
 
     const controller = new AbortController();

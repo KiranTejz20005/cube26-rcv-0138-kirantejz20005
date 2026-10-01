@@ -16,7 +16,7 @@ async function main() {
   await fs.mkdir(uploadDir, { recursive: true });
 
   const testImagePath = path.join(uploadDir, 'smoke-test-sample.png');
-  const samplePngBase64 = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
+  const samplePngBase64 = 'iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAAANUlEQVR42u3PMQ0AAAgAIGuS/qVjBh9IQFLSTaeqoKCgoKCgoKCgoKCgoKCgoKCgoKCg4GvgAE4YAb/t66LAAAAAAElFTkSuQmCC';
 
   try {
     await fs.writeFile(testImagePath, Buffer.from(samplePngBase64, 'base64'));
