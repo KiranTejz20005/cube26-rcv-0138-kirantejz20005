@@ -16,14 +16,31 @@ import {
 export const revalidate = 0;
 
 export default async function DashboardPage() {
-  const inspections = await prisma.inspection.findMany({
-    orderBy: { createdAt: 'desc' },
-    include: {
-      purchaseOrder: true,
-      checks: true,
-    },
-    take: 10,
-  });
+  let inspections: Array<{
+    id: string;
+    overallDecision: string | null;
+    createdAt: Date;
+    purchaseOrder: {
+      orderNumber: string;
+      sku: string;
+      productName: string | null;
+      expectedQuantity: number;
+      expectedVariant: string | null;
+    } | null;
+  }> = [];
+
+  try {
+    inspections = await prisma.inspection.findMany({
+      orderBy: { createdAt: 'desc' },
+      include: {
+        purchaseOrder: true,
+        checks: true,
+      },
+      take: 10,
+    });
+  } catch (err) {
+    console.error('Failed to fetch inspections on home page:', err);
+  }
 
   const totalCount = inspections.length;
   const passCount = inspections.filter((i) => i.overallDecision === 'PASS').length;
